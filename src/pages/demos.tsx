@@ -82,7 +82,7 @@ export function DemosPage() {
       <section style={styles.section}>
         <h2 style={styles.sectionTitle}>Virtualization</h2>
         <p style={styles.sectionDesc}>
-          50 pre-loaded messages with markdown content. Scroll the
+          500 pre-loaded messages with markdown content. Scroll the
           conversation and watch the virtualization log — only a handful
           of messages are in the DOM at any time.
         </p>

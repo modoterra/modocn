@@ -46,7 +46,7 @@ const ANSWERS = [
   "The `prepare()` step is the one-time analysis pass. A simplified flow looks like this:\n\n```tsx\nconst prepared = prepare(text, { font })\nconst box = layout(prepared, {\n  maxWidth: 520,\n  lineHeight: 22,\n})\n```\n\n`prepare()` does the expensive measuring once, then `layout()` just reuses the cached widths.",
   "A rough comparison looks like this:\n\n| Operation | Typical cost | Why |\n| --- | --- | --- |\n| `prepare()` | ~19ms / 500 texts | segmentation + measurement |\n| `layout()` | ~0.09ms / 500 texts | cached arithmetic only |\n| DOM measurement | 15-50ms | synchronous reflow |\n\nThe important part is that only the hot path stays in the critical rendering loop.",
   "Yes. Pretext uses `Intl.Segmenter`, so it can handle mixed scripts like **emoji** \u{1F680}, **CJK** `\u{6625}\u{5929}\u{5230}\u{4E86}`, and **Arabic** `\u{628}\u{62F}\u{623}\u{62A} \u{627}\u{644}\u{631}\u{62D}\u{644}\u{629}`.\n\n> The measurement stays font-accurate because canvas still uses the browser's glyph metrics.",
-  "Virtualization reduces DOM cost by keeping the render set tiny:\n\n1. Compute every message height\n2. Derive absolute offsets\n3. Render only the visible window plus overscan\n4. Swap nodes as you scroll\n\nThat means a 50-message transcript can still behave like a much smaller tree.",
+  "Virtualization reduces DOM cost by keeping the render set tiny:\n\n1. Compute every message height\n2. Derive absolute offsets\n3. Render only the visible window plus overscan\n4. Swap nodes as you scroll\n\nThat means a 500-message transcript can still behave like a much smaller tree.",
   "Balanced text wrapping finds the narrowest container width that preserves the line count. In practice that gives you:\n\n- tighter bubbles\n- less dead horizontal space\n- a cleaner left/right rhythm in chat UIs",
   "During streaming, message content grows token by token. The update loop is basically:\n\n- append chunk\n- recompute the last message height\n- update offsets\n- auto-scroll if the user is pinned to bottom\n\nBecause `layout()` is cheap, you can do that on every token without visible jank.",
   "Canvas provides the low-level width primitive:\n\n```ts\nconst metrics = ctx.measureText(segment)\nconst width = metrics.width\n```\n\nFrom there, pretext can build a reusable width cache instead of asking the DOM to lay out live elements.",
@@ -76,7 +76,7 @@ function generateMessages(pairCount: number): Message[] {
   return messages
 }
 
-const INITIAL_MESSAGES = generateMessages(25)
+const INITIAL_MESSAGES = generateMessages(250)
 
 type LogEntry = {
   time: string
