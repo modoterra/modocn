@@ -2,7 +2,12 @@ import { Link } from "react-router"
 import { ChatCompositionDemo } from "@/src/demos/chat-composition-demo"
 import { StreamingPresetsDemo } from "@/src/demos/streaming-presets-demo"
 import { VirtualizationDemo } from "@/src/demos/virtualization-demo"
+import { Playground } from "@/src/components/playground"
 import type { CSSProperties } from "react"
+
+import chatCompositionSource from "@/src/demos/chat-composition-demo.tsx?raw"
+import streamingPresetsSource from "@/src/demos/streaming-presets-demo.tsx?raw"
+import virtualizationSource from "@/src/demos/virtualization-demo.tsx?raw"
 
 const styles: Record<string, CSSProperties> = {
   page: {
@@ -63,7 +68,9 @@ export function DemosPage() {
           Streaming chat with markdown rendering, virtualized messages,
           and copy support. Type a message to see it in action.
         </p>
-        <ChatCompositionDemo />
+        <Playground code={chatCompositionSource}>
+          <ChatCompositionDemo />
+        </Playground>
       </section>
 
       <hr style={{ marginTop: "3rem" }} />
@@ -74,7 +81,9 @@ export function DemosPage() {
           Five animation presets for word-level streaming text. Each card
           loops the same text with a different animation.
         </p>
-        <StreamingPresetsDemo />
+        <Playground code={streamingPresetsSource}>
+          <StreamingPresetsDemo />
+        </Playground>
       </section>
 
       <hr style={{ marginTop: "3rem" }} />
@@ -86,7 +95,9 @@ export function DemosPage() {
           conversation and watch the virtualization log — only a handful
           of messages are in the DOM at any time.
         </p>
-        <VirtualizationDemo />
+        <Playground code={virtualizationSource}>
+          <VirtualizationDemo />
+        </Playground>
       </section>
 
       <nav style={styles.nav}>
