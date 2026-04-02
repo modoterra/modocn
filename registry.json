@@ -1,0 +1,149 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "modocn",
+  "homepage": "https://modocn.mdtrr.com",
+  "items": [
+    {
+      "name": "chat-box",
+      "type": "registry:block",
+      "title": "Chat Box",
+      "description": "Headless AI chat box with streaming support and pretext-powered text measurement. Provides a context provider, chat state hook, auto-sizing textarea hook, and keyboard handling — bring your own UI.",
+      "dependencies": ["@chenglou/pretext"],
+      "categories": ["ai", "chat"],
+      "files": [
+        {
+          "path": "registry/default/chat-box/components/chat-box.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/default/chat-box/hooks/use-chat.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/default/chat-box/hooks/use-pretext.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/default/chat-box/hooks/use-autosize.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/default/chat-box/lib/types.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "registry/default/chat-box/lib/transport.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "chat-input",
+      "type": "registry:block",
+      "title": "Chat Input",
+      "description": "Headless chat input with pretext-powered auto-sizing textarea. Render prop pattern provides height, line count, and keyboard handling — bring your own textarea and buttons.",
+      "dependencies": ["@chenglou/pretext"],
+      "registryDependencies": ["chat-box"],
+      "categories": ["ai", "chat"],
+      "files": [
+        {
+          "path": "registry/default/chat-input/components/chat-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "chat-message",
+      "type": "registry:block",
+      "title": "Chat Message",
+      "description": "Headless per-message component with pretext-powered balanced text (tightest bubble width preserving line count), copy-to-clipboard, and render props.",
+      "dependencies": ["@chenglou/pretext"],
+      "registryDependencies": ["chat-box"],
+      "categories": ["ai", "chat"],
+      "files": [
+        {
+          "path": "registry/default/chat-message/components/chat-message.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/default/chat-message/hooks/use-balanced-text.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "chat-messages",
+      "type": "registry:block",
+      "title": "Chat Messages",
+      "description": "Virtualized message list with pretext-powered height computation, scroll management with stick-to-bottom behavior, and render props for full layout control.",
+      "dependencies": ["@chenglou/pretext"],
+      "registryDependencies": ["chat-box"],
+      "categories": ["ai", "chat"],
+      "files": [
+        {
+          "path": "registry/default/chat-messages/components/chat-messages.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/default/chat-messages/hooks/use-message-heights.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/default/chat-messages/hooks/use-virtual-messages.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/default/chat-messages/hooks/use-chat-scroll.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "transport-openai",
+      "type": "registry:block",
+      "title": "Transport: OpenAI",
+      "description": "ChatTransport implementation for OpenAI's chat completions API. Parses SSE text/event-stream format. Supports custom base URL and model selection.",
+      "registryDependencies": ["chat-box"],
+      "categories": ["ai", "chat"],
+      "files": [
+        {
+          "path": "registry/default/transport-openai/lib/transport-openai.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "streaming-text",
+      "type": "registry:block",
+      "title": "Streaming Text",
+      "description": "Animated streaming text with word-level motion. Ships with configurable presets (fade-blur, fade, slide-up, scale, none) and supports fully custom animation configs.",
+      "dependencies": ["motion"],
+      "categories": ["ai", "chat"],
+      "files": [
+        {
+          "path": "registry/default/streaming-text/components/streaming-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/default/streaming-text/lib/presets.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "chat-full",
+      "type": "registry:block",
+      "title": "Chat Full",
+      "description": "Fully styled chat interface composing chat-box, chat-input, chat-message, and chat-messages. Reference implementation with virtualized messages, balanced text, auto-sizing input, and scroll management.",
+      "dependencies": ["@chenglou/pretext"],
+      "registryDependencies": ["chat-box", "chat-input", "chat-message", "chat-messages"],
+      "categories": ["ai", "chat"],
+      "files": [
+        {
+          "path": "registry/default/chat-full/components/chat-full.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}

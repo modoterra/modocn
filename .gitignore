@@ -1,0 +1,17 @@
+node_modules/
+public/r/
+.next/
+dist/
+*.tsbuildinfo
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+.playwright-mcp/
+
+# Playwright MCP screenshots
+/screenshots/
+current-*.png
