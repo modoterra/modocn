@@ -22,6 +22,9 @@ const GAP = 8
 // Assistant bubble: padding (8+8) + roleLabel (~14) + actions (~24) + border (2) = 56
 const USER_PADDING = 16
 const ASSISTANT_PADDING = 56
+// Horizontal chrome consumed by message row padding and bubble padding/border
+const ROW_H_PAD = 32 // padding "0 16px" on each message row
+const BUBBLE_H_CHROME = 30 // padding (14+14) + border (2) on assistant bubble
 
 export type ChatFullProps = ChatOptions & {
   /** Optional header element. */
@@ -49,11 +52,16 @@ export function ChatFull({
 function MessageArea({ placeholder }: { placeholder: string }) {
   const { messages } = useChatBox()
   const [viewportHeight, setViewportHeight] = useState(0)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  const effectiveMaxWidth = containerWidth > 0
+    ? Math.min(containerWidth - ROW_H_PAD - BUBBLE_H_CHROME, MAX_BUBBLE_WIDTH)
+    : MAX_BUBBLE_WIDTH
 
   const rawHeights = useMessageHeights({
     messages,
     font: FONT,
-    maxWidth: MAX_BUBBLE_WIDTH,
+    maxWidth: effectiveMaxWidth,
     lineHeight: LINE_HEIGHT,
   })
 
@@ -84,6 +92,7 @@ function MessageArea({ placeholder }: { placeholder: string }) {
       scroll.containerRef.current = el
       if (el) {
         setViewportHeight(el.clientHeight)
+        setContainerWidth(el.clientWidth)
       }
     },
     [scroll.containerRef]
@@ -95,6 +104,7 @@ function MessageArea({ placeholder }: { placeholder: string }) {
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setViewportHeight(entry.contentRect.height)
+        setContainerWidth(entry.contentRect.width)
       }
     })
     observer.observe(el)
@@ -127,7 +137,7 @@ function MessageArea({ placeholder }: { placeholder: string }) {
                   padding: "0 16px",
                 }}
               >
-                <MessageBubble message={msg} />
+                <MessageBubble message={msg} maxWidth={effectiveMaxWidth} />
               </div>
             )
           })}
@@ -146,7 +156,7 @@ function MessageArea({ placeholder }: { placeholder: string }) {
   )
 }
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({ message, maxWidth }: { message: Message; maxWidth: number }) {
   const isUser = message.role === "user"
 
   if (isUser) {
@@ -161,7 +171,7 @@ function MessageBubble({ message }: { message: Message }) {
     <ChatMessage
       message={message}
       font={FONT}
-      maxWidth={MAX_BUBBLE_WIDTH}
+      maxWidth={maxWidth}
       lineHeight={LINE_HEIGHT}
     >
       {({ width, copied, copy }) => (
@@ -170,7 +180,7 @@ function MessageBubble({ message }: { message: Message }) {
             ...fullStyles.bubble,
             ...fullStyles.assistantBubble,
             width: width > 0 ? width + 28 : undefined,
-            maxWidth: MAX_BUBBLE_WIDTH + 28,
+            maxWidth: `min(${MAX_BUBBLE_WIDTH + 28}px, 100%)`,
           }}
         >
           <div style={fullStyles.roleLabel}>Assistant</div>
