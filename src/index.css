@@ -99,3 +99,46 @@
     border-top: 1px solid var(--border);
   }
 }
+
+/* Responsive layout — stacks to vertical on narrow screens */
+@media (max-width: 480px) {
+  .app-shell {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.25rem;
+  }
+
+  .demo-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem;
+  }
+
+  .demo-header-meta {
+    display: none !important;
+  }
+}
+
+/* Demo shell containment */
+.demo-shell {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Horizontal scroll for tables and code on narrow viewports */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

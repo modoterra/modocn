@@ -6,7 +6,7 @@ import { ChatInput } from "@/registry/default/chat-input/components/chat-input"
 import { ChatMessage } from "@/registry/default/chat-message/components/chat-message"
 import { MarkdownContent } from "@/registry/default/chat-message/components/markdown-content"
 import { ChatMessages } from "@/registry/default/chat-messages/components/chat-messages"
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createMockStreamFetch } from "../lib/mock-stream"
 
 import type { CSSProperties } from "react"
@@ -16,6 +16,8 @@ const mockFetch = createMockStreamFetch({ tokenDelay: 20 })
 
 const MAX_MESSAGE_WIDTH = 520
 const ASSISTANT_BUBBLE_WIDTH = MAX_MESSAGE_WIDTH + 34
+const BUBBLE_H_CHROME = 34
+const CONVERSATION_H_PAD = 32
 const MESSAGE_GAP = 16
 const USER_CHROME_HEIGHT = 46
 const ASSISTANT_CHROME_HEIGHT = 82
@@ -32,7 +34,8 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "baseline",
     justifyContent: "space-between",
-    padding: "1rem 1.25rem",
+    gap: "0.5rem",
+    padding: "1rem",
     borderBottom: "1px solid var(--border)",
     fontSize: "0.75rem",
   },
@@ -43,14 +46,15 @@ const styles: Record<string, CSSProperties> = {
   },
   headerMeta: {
     display: "flex",
-    gap: "1.5rem",
+    flexWrap: "wrap" as const,
+    gap: "0.5rem 1.5rem",
     color: "var(--muted-foreground)",
   },
   conversation: {
     position: "relative" as const,
     height: 420,
     overflowY: "auto" as const,
-    padding: "1rem 1.25rem",
+    padding: "1rem",
   },
   empty: {
     display: "flex",
@@ -72,14 +76,13 @@ const styles: Record<string, CSSProperties> = {
     lineHeight: 1.6,
   },
   userBubble: {
-    maxWidth: ASSISTANT_BUBBLE_WIDTH,
+    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
     padding: "0.75rem 1rem",
     border: "1px solid var(--border)",
     background: "var(--card)",
   },
   assistantBubble: {
-    width: ASSISTANT_BUBBLE_WIDTH,
-    maxWidth: "100%",
+    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
     padding: "0.75rem 1rem",
     border: "1px solid var(--border)",
   },
@@ -129,8 +132,8 @@ const styles: Record<string, CSSProperties> = {
   },
   composer: {
     display: "flex",
-    gap: "0.75rem",
-    padding: "1rem 1.25rem",
+    gap: "0.5rem",
+    padding: "1rem",
     borderTop: "1px solid var(--border)",
   },
   textarea: {
@@ -159,7 +162,7 @@ const styles: Record<string, CSSProperties> = {
     height: 42,
   },
   hint: {
-    padding: "0 1.25rem 0.75rem",
+    padding: "0 1rem 0.75rem",
     fontSize: "0.625rem",
     color: "var(--muted-foreground)",
     letterSpacing: "0.02em",
@@ -169,7 +172,7 @@ const styles: Record<string, CSSProperties> = {
 export function ChatCompositionDemo() {
   return (
     <ChatBox api="/api/chat" fetch={mockFetch}>
-      <div style={styles.shell}>
+      <div className="demo-shell" style={styles.shell}>
         <ShellHeader />
         <Conversation />
         <Composer />
@@ -188,9 +191,9 @@ function ShellHeader() {
   ).length
 
   return (
-    <div style={styles.header}>
+    <div className="demo-header" style={styles.header}>
       <span style={styles.headerTitle}>Chat Composition</span>
-      <div style={styles.headerMeta}>
+      <div className="demo-header-meta" style={styles.headerMeta}>
         <span>messages: {messages.length}</span>
         <span>assistant: {assistantCount}</span>
         <span>status: {isLoading ? "streaming" : "idle"}</span>
@@ -200,6 +203,26 @@ function ShellHeader() {
 }
 
 function Conversation() {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const update = () => setContainerWidth(el.clientWidth)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const effectiveMaxWidth = containerWidth > 0
+    ? Math.min(
+        containerWidth - CONVERSATION_H_PAD - BUBBLE_H_CHROME,
+        MAX_MESSAGE_WIDTH,
+      )
+    : MAX_MESSAGE_WIDTH
+
   const renderContent = useCallback((message: Message) => {
     if (message.role === "user") {
       return <div style={styles.bubbleText}>{message.content}</div>
@@ -223,71 +246,73 @@ function Conversation() {
   const measureKey = useMemo(() => "chat-composition", [])
 
   return (
-    <ChatMessages
-      maxWidth={MAX_MESSAGE_WIDTH}
-      gap={MESSAGE_GAP}
-      overscan={5}
-      paddingPerMessage={paddingPerMessage}
-      renderContent={renderContent}
-      measureKey={measureKey}
-    >
-      {({ messages, virtualMessages, totalHeight, scroll }) => (
-        <div style={{ position: "relative" }}>
-          <div
-            ref={scroll.containerRef}
-            onScroll={scroll.onScroll}
-            style={styles.conversation}
-          >
-            {messages.length === 0 ? (
-              <div style={styles.empty}>
-                <div style={styles.emptyTitle}>Start a conversation</div>
-                <p style={styles.emptyDesc}>
-                  Type a message below to see streaming responses,
-                  virtualized layout, and auto-scrolling.
-                </p>
-              </div>
-            ) : (
-              <div style={{ height: totalHeight, position: "relative" }}>
-                {virtualMessages.map((vm) => {
-                  const message = messages[vm.index]
-                  const isUser = message.role === "user"
+    <div ref={wrapperRef}>
+      <ChatMessages
+        maxWidth={effectiveMaxWidth}
+        gap={MESSAGE_GAP}
+        overscan={5}
+        paddingPerMessage={paddingPerMessage}
+        renderContent={renderContent}
+        measureKey={measureKey}
+      >
+        {({ messages, virtualMessages, totalHeight, scroll }) => (
+          <div style={{ position: "relative" }}>
+            <div
+              ref={scroll.containerRef}
+              onScroll={scroll.onScroll}
+              style={styles.conversation}
+            >
+              {messages.length === 0 ? (
+                <div style={styles.empty}>
+                  <div style={styles.emptyTitle}>Start a conversation</div>
+                  <p style={styles.emptyDesc}>
+                    Type a message below to see streaming responses,
+                    virtualized layout, and auto-scrolling.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ height: totalHeight, position: "relative" }}>
+                  {virtualMessages.map((vm) => {
+                    const message = messages[vm.index]
+                    const isUser = message.role === "user"
 
-                  return (
-                    <div
-                      key={vm.id}
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        right: 0,
-                        top: vm.offsetTop,
-                        display: "flex",
-                        justifyContent: isUser ? "flex-end" : "flex-start",
-                      }}
-                    >
-                      {isUser ? (
-                        <UserBubble content={message.content} />
-                      ) : (
-                        <AssistantBubble message={message} />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                    return (
+                      <div
+                        key={vm.id}
+                        style={{
+                          position: "absolute",
+                          left: 0,
+                          right: 0,
+                          top: vm.offsetTop,
+                          display: "flex",
+                          justifyContent: isUser ? "flex-end" : "flex-start",
+                        }}
+                      >
+                        {isUser ? (
+                          <UserBubble content={message.content} />
+                        ) : (
+                          <AssistantBubble message={message} />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
 
-            {!scroll.isAtBottom && messages.length > 0 && (
-              <button
-                type="button"
-                onClick={() => scroll.scrollToBottom()}
-                style={styles.scrollBtn}
-              >
-                Jump to latest
-              </button>
-            )}
+              {!scroll.isAtBottom && messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => scroll.scrollToBottom()}
+                  style={styles.scrollBtn}
+                >
+                  Jump to latest
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </ChatMessages>
+        )}
+      </ChatMessages>
+    </div>
   )
 }
 

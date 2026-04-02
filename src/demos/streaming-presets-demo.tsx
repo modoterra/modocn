@@ -23,7 +23,7 @@ const PRESETS = Object.keys(STREAMING_TEXT_PRESETS) as StreamingTextPreset[]
 const styles: Record<string, CSSProperties> = {
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(16rem, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(min(16rem, 100%), 1fr))",
     gap: "1rem",
   },
   card: {

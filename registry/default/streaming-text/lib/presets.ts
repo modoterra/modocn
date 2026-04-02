@@ -8,8 +8,8 @@ export type AnimationConfig = {
 
 export const STREAMING_TEXT_PRESETS = {
   "fade-blur": {
-    initial: { opacity: 0, filter: "blur(3px)" },
-    animate: { opacity: 1, filter: "blur(0px)" },
+    initial: { opacity: 0, filter: "blur(3px)", WebkitFilter: "blur(3px)" },
+    animate: { opacity: 1, filter: "blur(0px)", WebkitFilter: "blur(0px)" },
     transition: { duration: 0.25, ease: "easeOut" },
   },
   fade: {

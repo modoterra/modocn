@@ -55,7 +55,7 @@ export function StreamingText({
       {tokens.map((token, i) => (
         <motion.span
           key={i}
-          style={{ display: "inline", whiteSpace: "pre-wrap" }}
+          style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
           initial={i >= prevCount ? config.initial : false}
           animate={config.animate}
           transition={config.transition}

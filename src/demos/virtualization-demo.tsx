@@ -22,6 +22,8 @@ const mockFetch = createMockStreamFetch({ tokenDelay: 20 })
 
 const MAX_MESSAGE_WIDTH = 520
 const ASSISTANT_BUBBLE_WIDTH = MAX_MESSAGE_WIDTH + 34
+const BUBBLE_H_CHROME = 34
+const CONVERSATION_H_PAD = 32
 const MESSAGE_GAP = 16
 const USER_CHROME_HEIGHT = 46
 const ASSISTANT_CHROME_HEIGHT = 82
@@ -94,13 +96,14 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column" as const,
     gap: "0.75rem",
-    padding: "1rem 1.25rem",
+    padding: "1rem",
     borderBottom: "1px solid var(--border)",
   },
   headerTop: {
     display: "flex",
     alignItems: "baseline",
     justifyContent: "space-between",
+    gap: "0.5rem",
   },
   headerTitle: {
     fontSize: "0.75rem",
@@ -115,7 +118,8 @@ const styles: Record<string, CSSProperties> = {
   },
   stats: {
     display: "flex",
-    gap: "1.5rem",
+    flexWrap: "wrap" as const,
+    gap: "0.25rem 1.5rem",
     fontSize: "0.75rem",
     color: "var(--muted-foreground)",
   },
@@ -127,17 +131,16 @@ const styles: Record<string, CSSProperties> = {
     position: "relative" as const,
     height: 420,
     overflowY: "auto" as const,
-    padding: "1rem 1.25rem",
+    padding: "1rem",
   },
   userBubble: {
-    maxWidth: ASSISTANT_BUBBLE_WIDTH,
+    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
     padding: "0.625rem 0.875rem",
     border: "1px solid var(--border)",
     background: "var(--card)",
   },
   assistantBubble: {
-    width: ASSISTANT_BUBBLE_WIDTH,
-    maxWidth: "100%",
+    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
     padding: "0.625rem 0.875rem",
     border: "1px solid var(--border)",
   },
@@ -189,7 +192,7 @@ const styles: Record<string, CSSProperties> = {
     borderTop: "1px solid var(--border)",
   },
   logBody: {
-    padding: "0.75rem 1.25rem",
+    padding: "0.75rem 1rem",
     fontSize: "0.6875rem",
     lineHeight: 1.7,
     color: "var(--muted-foreground)",
@@ -214,7 +217,7 @@ export function VirtualizationDemo() {
       fetch={mockFetch}
       initialMessages={INITIAL_MESSAGES}
     >
-      <div style={styles.shell}>
+      <div className="demo-shell" style={styles.shell}>
         <VirtHeader latestLog={latestLog} />
         <MemoVirtConversation onVirtualChange={updateLog} />
         <VirtLog entry={latestLog} />
@@ -228,9 +231,9 @@ function VirtHeader({ latestLog }: { latestLog: LogEntry | null }) {
 
   return (
     <div style={styles.header}>
-      <div style={styles.headerTop}>
+      <div className="demo-header" style={styles.headerTop}>
         <span style={styles.headerTitle}>Virtualization</span>
-        <div style={styles.stats}>
+        <div className="demo-header-meta" style={styles.stats}>
           <span>
             total: <strong style={styles.statHighlight}>{messages.length}</strong>
           </span>
@@ -261,6 +264,26 @@ function VirtConversation({
 }: {
   onVirtualChange: (entry: LogEntry) => void
 }) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const update = () => setContainerWidth(el.clientWidth)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const effectiveMaxWidth = containerWidth > 0
+    ? Math.min(
+        containerWidth - CONVERSATION_H_PAD - BUBBLE_H_CHROME,
+        MAX_MESSAGE_WIDTH,
+      )
+    : MAX_MESSAGE_WIDTH
+
   const renderContent = useCallback((message: Message) => {
     if (message.role === "user") {
       return <div style={styles.bubbleText}>{message.content}</div>
@@ -284,69 +307,71 @@ function VirtConversation({
   const measureKey = useMemo(() => "virtualization-markdown", [])
 
   return (
-    <ChatMessages
-      maxWidth={MAX_MESSAGE_WIDTH}
-      gap={MESSAGE_GAP}
-      overscan={5}
-      paddingPerMessage={paddingPerMessage}
-      renderContent={renderContent}
-      measureKey={measureKey}
-    >
-      {({ messages, virtualMessages, totalHeight, scroll }) => (
-        <div style={{ position: "relative" }}>
-          <VirtualWindowLogger
-            virtualMessages={virtualMessages}
-            messages={messages}
-            scrollTop={scroll.scrollTop}
-            totalHeight={totalHeight}
-            onLog={onVirtualChange}
-          />
+    <div ref={wrapperRef}>
+      <ChatMessages
+        maxWidth={effectiveMaxWidth}
+        gap={MESSAGE_GAP}
+        overscan={5}
+        paddingPerMessage={paddingPerMessage}
+        renderContent={renderContent}
+        measureKey={measureKey}
+      >
+        {({ messages, virtualMessages, totalHeight, scroll }) => (
+          <div style={{ position: "relative" }}>
+            <VirtualWindowLogger
+              virtualMessages={virtualMessages}
+              messages={messages}
+              scrollTop={scroll.scrollTop}
+              totalHeight={totalHeight}
+              onLog={onVirtualChange}
+            />
 
-          <div
-            ref={scroll.containerRef}
-            onScroll={scroll.onScroll}
-            style={styles.conversation}
-          >
-            <div style={{ height: totalHeight, position: "relative" }}>
-              {virtualMessages.map((vm) => {
-                const message = messages[vm.index]
-                const isUser = message.role === "user"
+            <div
+              ref={scroll.containerRef}
+              onScroll={scroll.onScroll}
+              style={styles.conversation}
+            >
+              <div style={{ height: totalHeight, position: "relative" }}>
+                {virtualMessages.map((vm) => {
+                  const message = messages[vm.index]
+                  const isUser = message.role === "user"
 
-                return (
-                  <div
-                    key={vm.id}
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      right: 0,
-                      top: vm.offsetTop,
-                      display: "flex",
-                      justifyContent: isUser ? "flex-end" : "flex-start",
-                    }}
-                  >
-                    {isUser ? (
-                      <UserBubble content={message.content} />
-                    ) : (
-                      <AssistantBubble message={message} />
-                    )}
-                  </div>
-                )
-              })}
+                  return (
+                    <div
+                      key={vm.id}
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        top: vm.offsetTop,
+                        display: "flex",
+                        justifyContent: isUser ? "flex-end" : "flex-start",
+                      }}
+                    >
+                      {isUser ? (
+                        <UserBubble content={message.content} />
+                      ) : (
+                        <AssistantBubble message={message} />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {!scroll.isAtBottom && messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => scroll.scrollToBottom()}
+                  style={styles.scrollBtn}
+                >
+                  Jump to latest
+                </button>
+              )}
             </div>
-
-            {!scroll.isAtBottom && messages.length > 0 && (
-              <button
-                type="button"
-                onClick={() => scroll.scrollToBottom()}
-                style={styles.scrollBtn}
-              >
-                Jump to latest
-              </button>
-            )}
           </div>
-        </div>
-      )}
-    </ChatMessages>
+        )}
+      </ChatMessages>
+    </div>
   )
 }
 

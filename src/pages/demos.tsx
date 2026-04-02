@@ -41,7 +41,9 @@ const styles: Record<string, CSSProperties> = {
     paddingTop: "2rem",
     borderTop: "1px solid var(--border)",
     display: "flex",
+    flexWrap: "wrap" as const,
     justifyContent: "space-between",
+    gap: "0.5rem",
     fontSize: "1rem",
   },
 }

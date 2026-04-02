@@ -155,6 +155,22 @@ function buildComponents(highlighter: Highlighter | undefined, theme: string) {
         <h3 style={{ ...styles.heading, fontSize: "1.15em" }}>{children}</h3>
       )
     },
+
+    table({ children }: { children?: React.ReactNode }) {
+      return (
+        <div style={styles.tableScroll}>
+          <table style={styles.table}>{children}</table>
+        </div>
+      )
+    },
+
+    th({ children }: { children?: React.ReactNode }) {
+      return <th style={styles.th}>{children}</th>
+    },
+
+    td({ children }: { children?: React.ReactNode }) {
+      return <td style={styles.td}>{children}</td>
+    },
   }
 }
 
@@ -182,6 +198,8 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: "0.5em",
+    minWidth: 0,
+    overflow: "hidden",
   },
   paragraph: {
     margin: 0,
@@ -241,5 +259,26 @@ const styles: Record<string, CSSProperties> = {
     margin: 0,
     lineHeight: 1.3,
     color: "inherit",
+  },
+  tableScroll: {
+    overflowX: "auto" as const,
+    WebkitOverflowScrolling: "touch" as const,
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse" as const,
+    fontSize: "0.875em",
+    lineHeight: 1.5,
+  },
+  th: {
+    textAlign: "left" as const,
+    fontWeight: 600,
+    padding: "0.375em 0.75em",
+    borderBottom: "1px solid var(--border)",
+    whiteSpace: "nowrap" as const,
+  },
+  td: {
+    padding: "0.375em 0.75em",
+    borderBottom: "1px solid var(--border)",
   },
 }

@@ -221,24 +221,26 @@ export function ComponentsPage() {
           </code>
 
           <p style={styles.propsLabel}>Props / Options</p>
-          <table style={styles.propsTable}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Type</th>
-                <th style={styles.th}>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {c.props.map((p) => (
-                <tr key={p.name}>
-                  <td style={{ ...styles.td, ...styles.tdCode }}>{p.name}</td>
-                  <td style={{ ...styles.td, ...styles.tdType }}>{p.type}</td>
-                  <td style={{ ...styles.td, ...styles.tdDesc }}>{p.description}</td>
+          <div className="table-scroll">
+            <table style={styles.propsTable}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Name</th>
+                  <th style={styles.th}>Type</th>
+                  <th style={styles.th}>Description</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {c.props.map((p) => (
+                  <tr key={p.name}>
+                    <td style={{ ...styles.td, ...styles.tdCode }}>{p.name}</td>
+                    <td style={{ ...styles.td, ...styles.tdType }}>{p.type}</td>
+                    <td style={{ ...styles.td, ...styles.tdDesc }}>{p.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       ))}
 

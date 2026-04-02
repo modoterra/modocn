@@ -97,7 +97,9 @@ const styles: Record<string, CSSProperties> = {
     paddingTop: "2rem",
     borderTop: "1px solid var(--border)",
     display: "flex",
+    flexWrap: "wrap" as const,
     justifyContent: "space-between",
+    gap: "0.5rem",
     fontSize: "1rem",
   },
 }
@@ -122,23 +124,25 @@ export function ConversationalUIPage() {
           components handle input, message rendering, and virtualization. All
           components can be styled and extended to match your application.
         </p>
-        <table style={styles.archTable}>
-          <tbody>
-            {ARCH_ROWS.map((row) => (
-              <tr key={row.name}>
-                <td style={styles.archName}>
-                  {row.indent > 0 && (
-                    <span style={{ color: "var(--muted-foreground)", fontWeight: 400 }}>
-                      {"  ".repeat(row.indent)}
-                    </span>
-                  )}
-                  {row.name}
-                </td>
-                <td style={styles.archDesc}>{row.desc}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table style={styles.archTable}>
+            <tbody>
+              {ARCH_ROWS.map((row) => (
+                <tr key={row.name}>
+                  <td style={styles.archName}>
+                    {row.indent > 0 && (
+                      <span style={{ color: "var(--muted-foreground)", fontWeight: 400 }}>
+                        {"  ".repeat(row.indent)}
+                      </span>
+                    )}
+                    {row.name}
+                  </td>
+                  <td style={styles.archDesc}>{row.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section style={styles.section}>

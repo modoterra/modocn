@@ -24,7 +24,8 @@ const styles: Record<string, CSSProperties> = {
   meta: {
     display: "flex",
     alignItems: "baseline",
-    gap: "1.5rem",
+    flexWrap: "wrap" as const,
+    gap: "0.5rem 1.5rem",
     marginTop: "1.25rem",
   },
   version: {
@@ -75,7 +76,7 @@ const styles: Record<string, CSSProperties> = {
   },
   componentGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(16rem, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(min(16rem, 100%), 1fr))",
     gap: "1rem",
     marginTop: "2.5rem",
   },
