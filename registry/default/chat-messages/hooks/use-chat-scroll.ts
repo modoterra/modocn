@@ -5,8 +5,6 @@ export type ChatScrollState = {
   scrollTop: number
   /** Whether the user is scrolled to the bottom. */
   isAtBottom: boolean
-  /** Whether the user is scrolling fast (useful for placeholder rendering). */
-  isFastScrolling: boolean
   /** Ref to attach to the scrollable container element. */
   containerRef: React.RefObject<HTMLDivElement | null>
   /** Call this to scroll to the bottom programmatically. */
@@ -24,24 +22,17 @@ export type ChatScrollState = {
  * Uses a continuous rAF polling loop while scrolling is active.
  * scrollTop is read fresh from the DOM during every render to
  * eliminate the lag between state updates and paint.
- *
- * Exposes `isFastScrolling` when scroll velocity exceeds a
- * threshold, so consumers can render lightweight placeholders
- * instead of heavy content during fast scrollbar drags.
  */
 export function useChatScroll(options: {
   /** Total scrollable height of the virtualized list. */
   totalHeight: number
   /** Threshold in px to consider "at bottom". Default 40. */
   threshold?: number
-  /** Scroll velocity (px/frame) above which isFastScrolling is true. Default 800. */
-  fastScrollThreshold?: number
 }): ChatScrollState {
-  const { totalHeight, threshold = 40, fastScrollThreshold = 800 } = options
+  const { totalHeight, threshold = 40 } = options
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
-  const [isFastScrolling, setIsFastScrolling] = useState(false)
   const prevTotalHeightRef = useRef(totalHeight)
 
   // Trigger counter — only purpose is to force a re-render.
@@ -68,7 +59,6 @@ export function useChatScroll(options: {
   const rafRef = useRef(0)
   const idleTimerRef = useRef(0)
   const lastScrollTopRef = useRef(0)
-  const prevTickTopRef = useRef(0)
 
   // Continuous rAF loop — polls scrollTop every frame while active
   const tick = useCallback(() => {
@@ -80,17 +70,11 @@ export function useChatScroll(options: {
     const top = el.scrollTop
     if (top !== lastScrollTopRef.current) {
       lastScrollTopRef.current = top
-
-      // Velocity check: px moved since last tick
-      const velocity = Math.abs(top - prevTickTopRef.current)
-      prevTickTopRef.current = top
-      setIsFastScrolling(velocity > fastScrollThreshold)
-
       setScrollTick((t) => t + 1)
       setIsAtBottom(checkIsAtBottom())
     }
     rafRef.current = requestAnimationFrame(tick)
-  }, [checkIsAtBottom, fastScrollThreshold])
+  }, [checkIsAtBottom])
 
   const stopPolling = useCallback(() => {
     if (rafRef.current) {
@@ -98,7 +82,6 @@ export function useChatScroll(options: {
       rafRef.current = 0
     }
     // Final re-render to catch the resting position
-    setIsFastScrolling(false)
     setScrollTick((t) => t + 1)
     setIsAtBottom(checkIsAtBottom())
   }, [checkIsAtBottom])
@@ -106,7 +89,6 @@ export function useChatScroll(options: {
   const onScroll = useCallback(() => {
     // Start the rAF polling loop if not already running
     if (!rafRef.current) {
-      prevTickTopRef.current = containerRef.current?.scrollTop ?? 0
       rafRef.current = requestAnimationFrame(tick)
     }
     // Reset the idle timer — stop polling after scrolling settles
@@ -133,7 +115,6 @@ export function useChatScroll(options: {
   return {
     scrollTop,
     isAtBottom,
-    isFastScrolling,
     containerRef,
     scrollToBottom,
     onScroll,
