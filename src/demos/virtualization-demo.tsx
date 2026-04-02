@@ -16,7 +16,7 @@ import {
 import { createMockStreamFetch } from "../lib/mock-stream"
 
 import type { CSSProperties } from "react"
-import type { Message } from "@/registry/default/chat-box/lib/types"
+import type { Message, MessageRole } from "@/registry/default/chat-box/lib/types"
 
 const mockFetch = createMockStreamFetch({ tokenDelay: 20 })
 
@@ -202,6 +202,27 @@ const styles: Record<string, CSSProperties> = {
     color: "var(--foreground)",
     fontWeight: 500,
   },
+  placeholderBubble: {
+    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
+    padding: "0.625rem 0.875rem",
+    border: "1px solid var(--border)",
+    overflow: "hidden",
+    opacity: 0.5,
+  },
+  placeholderUser: {
+    background: "var(--card)",
+  },
+  placeholderAssistant: {
+    background: "transparent",
+  },
+  placeholderText: {
+    fontSize: "0.875rem",
+    lineHeight: 1.65,
+    color: "var(--muted-foreground)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
+  },
 }
 
 export function VirtualizationDemo() {
@@ -311,7 +332,7 @@ function VirtConversation({
       <ChatMessages
         maxWidth={effectiveMaxWidth}
         gap={MESSAGE_GAP}
-        overscan={5}
+        overscan={10}
         paddingPerMessage={paddingPerMessage}
         renderContent={renderContent}
         measureKey={measureKey}
@@ -348,7 +369,13 @@ function VirtConversation({
                         justifyContent: isUser ? "flex-end" : "flex-start",
                       }}
                     >
-                      {isUser ? (
+                      {scroll.isFastScrolling ? (
+                        <PlaceholderBubble
+                          role={message.role}
+                          height={vm.height}
+                          content={message.content}
+                        />
+                      ) : isUser ? (
                         <UserBubble content={message.content} />
                       ) : (
                         <AssistantBubble message={message} />
@@ -427,16 +454,16 @@ function VirtualWindowLogger({
   return null
 }
 
-function UserBubble({ content }: { content: string }) {
+const UserBubble = memo(function UserBubble({ content }: { content: string }) {
   return (
     <div style={styles.userBubble}>
       <div style={styles.bubbleRole}>You</div>
       <div style={styles.bubbleText}>{content}</div>
     </div>
   )
-}
+})
 
-function AssistantBubble({ message }: { message: Message }) {
+const AssistantBubble = memo(function AssistantBubble({ message }: { message: Message }) {
   return (
     <ChatMessage message={message}>
       {({ copied, copy }) => (
@@ -455,7 +482,33 @@ function AssistantBubble({ message }: { message: Message }) {
       )}
     </ChatMessage>
   )
-}
+})
+
+const PlaceholderBubble = memo(function PlaceholderBubble({
+  role,
+  height,
+  content,
+}: {
+  role: MessageRole
+  height: number
+  content: string
+}) {
+  const isUser = role === "user"
+  const firstLine = content.split("\n", 1)[0].slice(0, 80)
+
+  return (
+    <div
+      style={{
+        ...styles.placeholderBubble,
+        ...(isUser ? styles.placeholderUser : styles.placeholderAssistant),
+        height,
+      }}
+    >
+      <div style={styles.bubbleRole}>{isUser ? "You" : "Assistant"}</div>
+      <div style={styles.placeholderText}>{firstLine}</div>
+    </div>
+  )
+})
 
 function VirtLog({ entry }: { entry: LogEntry | null }) {
   return (
