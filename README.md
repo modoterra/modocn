@@ -56,7 +56,7 @@ npm run registry:build
 Example install command:
 
 ```bash
-npx shadcn@latest add https://modocn.mdtrr.com/r/chat-full.json
+npx shadcn add https://modocn.mdtrr.com/r/chat-full.json
 ```
 
 Other blocks are served from the same pattern:
