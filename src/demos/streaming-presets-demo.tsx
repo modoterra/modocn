@@ -2,10 +2,10 @@ import {
   StreamingText,
   STREAMING_TEXT_PRESETS,
 } from "@/registry/default/streaming-text/components/streaming-text"
+import { Card } from "@/components/ui/card"
 import type { StreamingTextPreset } from "@/registry/default/streaming-text/lib/presets"
 import { layout, prepare } from "@chenglou/pretext"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import type { CSSProperties } from "react"
 
 const SAMPLE_TEXT =
   "Pretext measures text using canvas as ground truth, so we can know the exact height of any text block before it hits the DOM."
@@ -20,42 +20,9 @@ const PRESET_DESCRIPTIONS: Record<StreamingTextPreset, string> = {
 
 const PRESETS = Object.keys(STREAMING_TEXT_PRESETS) as StreamingTextPreset[]
 
-const styles: Record<string, CSSProperties> = {
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(min(16rem, 100%), 1fr))",
-    gap: "1rem",
-  },
-  card: {
-    border: "1px solid var(--border)",
-    padding: "1.25rem",
-  },
-  label: {
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase" as const,
-    color: "var(--foreground)",
-    margin: 0,
-  },
-  desc: {
-    fontSize: "0.75rem",
-    color: "var(--muted-foreground)",
-    marginTop: "0.25rem",
-    lineHeight: 1.5,
-  },
-  textArea: {
-    marginTop: "1rem",
-    fontSize: "0.875rem",
-    lineHeight: 1.7,
-    color: "var(--foreground)",
-    whiteSpace: "pre-wrap" as const,
-  },
-}
-
 export function StreamingPresetsDemo() {
   return (
-    <div style={styles.grid}>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(16rem,100%),1fr))] gap-6">
       {PRESETS.map((preset, i) => (
         <PresetCard key={preset} preset={preset} staggerMs={i * 400} />
       ))}
@@ -75,19 +42,17 @@ function PresetCard({
   const textHeight = useTextHeight(SAMPLE_TEXT, containerRef)
 
   return (
-    <div style={styles.card}>
-      <p style={styles.label}>{preset}</p>
-      <p style={styles.desc}>{PRESET_DESCRIPTIONS[preset]}</p>
-      <div
-        ref={containerRef}
-        style={{
-          ...styles.textArea,
-          ...(textHeight ? { height: textHeight } : {}),
-        }}
-      >
-        <StreamingText content={content} preset={preset} />
+      <Card className="p-6">
+        <p className="text-xs font-semibold tracking-wide uppercase text-foreground m-0">{preset}</p>
+        <p className="text-xs text-muted-foreground mt-2 leading-normal">{PRESET_DESCRIPTIONS[preset]}</p>
+        <div
+          ref={containerRef}
+          className="mt-6 text-sm leading-relaxed text-foreground whitespace-pre-wrap"
+          style={textHeight ? { height: textHeight } : undefined}
+        >
+          <StreamingText content={content} preset={preset} />
       </div>
-    </div>
+    </Card>
   )
 }
 

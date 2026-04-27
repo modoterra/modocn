@@ -6,10 +6,12 @@ import { ChatInput } from "@/registry/default/chat-input/components/chat-input"
 import { ChatMessage } from "@/registry/default/chat-message/components/chat-message"
 import { MarkdownContent } from "@/registry/default/chat-message/components/markdown-content"
 import { ChatMessages } from "@/registry/default/chat-messages/components/chat-messages"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createMockStreamFetch } from "../lib/mock-stream"
 
-import type { CSSProperties } from "react"
 import type { Message } from "@/registry/default/chat-box/lib/types"
 
 const mockFetch = createMockStreamFetch({ tokenDelay: 20 })
@@ -26,160 +28,21 @@ const COMPOSER_FONT =
   '15px "JetBrains Mono", "Fira Code", "SF Mono", monospace'
 const COMPOSER_LINE_HEIGHT = 22
 
-const styles: Record<string, CSSProperties> = {
-  shell: {
-    border: "1px solid var(--border)",
-  },
-  header: {
-    display: "flex",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-    gap: "0.5rem",
-    padding: "1rem",
-    borderBottom: "1px solid var(--border)",
-    fontSize: "0.75rem",
-  },
-  headerTitle: {
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase" as const,
-  },
-  headerMeta: {
-    display: "flex",
-    flexWrap: "wrap" as const,
-    gap: "0.5rem 1.5rem",
-    color: "var(--muted-foreground)",
-  },
-  conversation: {
-    position: "relative" as const,
-    height: 420,
-    overflowY: "auto" as const,
-    padding: "1rem",
-  },
-  empty: {
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100%",
-    textAlign: "center" as const,
-  },
-  emptyTitle: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-  },
-  emptyDesc: {
-    marginTop: "0.5rem",
-    fontSize: "0.8125rem",
-    color: "var(--muted-foreground)",
-    maxWidth: "20rem",
-    lineHeight: 1.6,
-  },
-  userBubble: {
-    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
-    padding: "0.75rem 1rem",
-    border: "1px solid var(--border)",
-    background: "var(--card)",
-  },
-  assistantBubble: {
-    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
-    padding: "0.75rem 1rem",
-    border: "1px solid var(--border)",
-  },
-  bubbleRole: {
-    fontSize: "0.625rem",
-    fontWeight: 600,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
-    color: "var(--muted-foreground)",
-    marginBottom: "0.375rem",
-  },
-  bubbleText: {
-    fontSize: "0.875rem",
-    lineHeight: 1.65,
-    whiteSpace: "pre-wrap" as const,
-    wordBreak: "break-word" as const,
-  },
-  copyBtn: {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: "0.5rem",
-  },
-  copyButton: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "0.625rem",
-    fontWeight: 600,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
-    color: "var(--muted-foreground)",
-    padding: "0.25rem 0",
-  },
-  scrollBtn: {
-    position: "absolute" as const,
-    bottom: 12,
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "var(--background)",
-    border: "1px solid var(--border)",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "0.6875rem",
-    color: "var(--foreground)",
-    padding: "0.25rem 0.75rem",
-  },
-  composer: {
-    display: "flex",
-    gap: "0.5rem",
-    padding: "1rem",
-    borderTop: "1px solid var(--border)",
-  },
-  textarea: {
-    flex: 1,
-    resize: "none" as const,
-    border: "1px solid var(--border)",
-    background: "transparent",
-    color: "var(--foreground)",
-    fontFamily: "inherit",
-    fontSize: "0.875rem",
-    lineHeight: "22px",
-    padding: "0.625rem 0.75rem",
-    outline: "none",
-  },
-  sendBtn: {
-    alignSelf: "flex-end" as const,
-    background: "var(--foreground)",
-    color: "var(--background)",
-    border: "none",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    letterSpacing: "0.04em",
-    padding: "0.625rem 1rem",
-    height: 42,
-  },
-  hint: {
-    padding: "0 1rem 0.75rem",
-    fontSize: "0.625rem",
-    color: "var(--muted-foreground)",
-    letterSpacing: "0.02em",
-  },
-}
-
 export function ChatCompositionDemo() {
   return (
     <ChatBox api="/api/chat" fetch={mockFetch}>
-      <div className="demo-shell" style={styles.shell}>
+      <Card className="min-w-0 max-w-full overflow-x-hidden">
         <ShellHeader />
-        <Conversation />
-        <Composer />
-        <div style={styles.hint}>
-          Press Enter to send, Shift + Enter for a new line
-        </div>
-      </div>
+        <CardContent className="p-0">
+          <Conversation />
+        </CardContent>
+        <CardFooter className="flex-col items-stretch p-0">
+          <Composer />
+          <div className="px-4 pb-4 text-[0.625rem] text-muted-foreground tracking-wide">
+            Press Enter to send, Shift + Enter for a new line
+          </div>
+        </CardFooter>
+      </Card>
     </ChatBox>
   )
 }
@@ -191,14 +54,14 @@ function ShellHeader() {
   ).length
 
   return (
-    <div className="demo-header" style={styles.header}>
-      <span style={styles.headerTitle}>Chat Composition</span>
-      <div className="demo-header-meta" style={styles.headerMeta}>
+    <CardHeader className="flex-row items-baseline justify-between gap-3 px-5 py-5 border-b text-xs max-[480px]:flex-col max-[480px]:items-start max-[480px]:gap-3">
+      <span className="font-semibold tracking-wide uppercase">Chat Composition</span>
+      <div className="flex flex-wrap gap-x-6 gap-y-2 text-muted-foreground max-[480px]:hidden">
         <span>messages: {messages.length}</span>
         <span>assistant: {assistantCount}</span>
         <span>status: {isLoading ? "streaming" : "idle"}</span>
       </div>
-    </div>
+    </CardHeader>
   )
 }
 
@@ -225,7 +88,7 @@ function Conversation() {
 
   const renderContent = useCallback((message: Message) => {
     if (message.role === "user") {
-      return <div style={styles.bubbleText}>{message.content}</div>
+      return <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</div>
     }
     return (
       <MarkdownContent
@@ -256,22 +119,22 @@ function Conversation() {
         measureKey={measureKey}
       >
         {({ messages, virtualMessages, totalHeight, scroll }) => (
-          <div style={{ position: "relative" }}>
-            <div
-              ref={scroll.containerRef}
-              onScroll={scroll.onScroll}
-              style={styles.conversation}
-            >
+          <div className="relative">
+              <div
+                ref={scroll.containerRef}
+                onScroll={scroll.onScroll}
+                className="relative h-[420px] overflow-y-auto p-5"
+              >
               {messages.length === 0 ? (
-                <div style={styles.empty}>
-                  <div style={styles.emptyTitle}>Start a conversation</div>
-                  <p style={styles.emptyDesc}>
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <div className="text-xl font-semibold">Start a conversation</div>
+                  <p className="mt-2 text-[0.8125rem] text-muted-foreground max-w-[20rem] leading-relaxed">
                     Type a message below to see streaming responses,
                     virtualized layout, and auto-scrolling.
                   </p>
                 </div>
               ) : (
-                <div style={{ height: totalHeight, position: "relative" }}>
+                <div className="relative" style={{ height: totalHeight }}>
                   {virtualMessages.map((vm) => {
                     const message = messages[vm.index]
                     const isUser = message.role === "user"
@@ -279,14 +142,8 @@ function Conversation() {
                     return (
                       <div
                         key={vm.id}
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          right: 0,
-                          top: vm.offsetTop,
-                          display: "flex",
-                          justifyContent: isUser ? "flex-end" : "flex-start",
-                        }}
+                        className={`absolute left-0 right-0 flex ${isUser ? "justify-end" : "justify-start"}`}
+                        style={{ top: vm.offsetTop }}
                       >
                         {isUser ? (
                           <UserBubble content={message.content} />
@@ -300,13 +157,14 @@ function Conversation() {
               )}
 
               {!scroll.isAtBottom && messages.length > 0 && (
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => scroll.scrollToBottom()}
-                  style={styles.scrollBtn}
+                  className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs"
                 >
                   Jump to latest
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -318,9 +176,12 @@ function Conversation() {
 
 function UserBubble({ content }: { content: string }) {
   return (
-    <div style={styles.userBubble}>
-      <div style={styles.bubbleRole}>You</div>
-      <div style={styles.bubbleText}>{content}</div>
+    <div
+      className="border border-border bg-card px-4 py-3.5"
+      style={{ maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)` }}
+    >
+      <div className="text-[0.625rem] font-semibold tracking-widest uppercase text-muted-foreground mb-2">You</div>
+      <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{content}</div>
     </div>
   )
 }
@@ -329,16 +190,24 @@ function AssistantBubble({ message }: { message: Message }) {
   return (
     <ChatMessage message={message}>
       {({ copied, copy }) => (
-        <div style={styles.assistantBubble}>
-          <div style={styles.bubbleRole}>Assistant</div>
+        <div
+          className="border border-border px-4 py-3.5"
+          style={{ maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)` }}
+        >
+          <div className="text-[0.625rem] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Assistant</div>
           <MarkdownContent
             content={message.content}
             className="text-[14px] leading-[1.65]"
           />
-          <div style={styles.copyBtn}>
-            <button type="button" onClick={copy} style={styles.copyButton}>
+          <div className="flex justify-end mt-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copy}
+              className="text-[0.625rem] font-semibold tracking-widest uppercase text-muted-foreground p-0 h-auto"
+            >
               {copied ? "Copied" : "Copy"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -356,35 +225,31 @@ function Composer() {
       maxHeight={150}
     >
       {({ input, setInput, submit, stop, isLoading, height, onKeyDown }) => (
-        <div style={styles.composer}>
-          <textarea
+        <div className="flex gap-3 p-5 border-t border-border">
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Ask about pretext, streaming, virtualization..."
             disabled={isLoading}
+            className="flex-1 resize-none text-sm leading-[22px] min-h-0"
             style={{
-              ...styles.textarea,
               height,
               overflowY: height >= 150 ? "auto" : "hidden",
             }}
           />
           {isLoading ? (
-            <button type="button" onClick={stop} style={styles.sendBtn}>
+            <Button variant="destructive" onClick={stop} className="self-end h-[44px]">
               Stop
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
+            <Button
               onClick={submit}
               disabled={!input.trim()}
-              style={{
-                ...styles.sendBtn,
-                opacity: input.trim() ? 1 : 0.4,
-              }}
+              className="self-end h-[44px]"
             >
               Send
-            </button>
+            </Button>
           )}
         </div>
       )}

@@ -3,7 +3,6 @@ import {
   useState,
   useEffect,
   type ReactNode,
-  type CSSProperties,
 } from "react"
 
 import { ChatBox, useChatBox } from "@/registry/default/chat-box/components/chat-box"
@@ -12,6 +11,10 @@ import { ChatMessage } from "@/registry/default/chat-message/components/chat-mes
 import { useMessageHeights } from "@/registry/default/chat-messages/hooks/use-message-heights"
 import { useVirtualMessages } from "@/registry/default/chat-messages/hooks/use-virtual-messages"
 import { useChatScroll } from "@/registry/default/chat-messages/hooks/use-chat-scroll"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 import type { ChatOptions, Message } from "@/registry/default/chat-box/lib/types"
 
 const FONT = '15px "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
@@ -31,20 +34,31 @@ export type ChatFullProps = ChatOptions & {
   header?: ReactNode
   /** Placeholder when no messages. */
   placeholder?: string
+  /** Additional className for the outer card. */
+  className?: string
 }
 
 export function ChatFull({
   header,
   placeholder = "Send a message to start the conversation.",
+  className,
   ...chatOptions
 }: ChatFullProps) {
   return (
     <ChatBox {...chatOptions}>
-      <div style={fullStyles.shell}>
-        {header && <div style={fullStyles.header}>{header}</div>}
-        <MessageArea placeholder={placeholder} />
-        <InputBar />
-      </div>
+      <Card className={cn("overflow-hidden h-[560px] font-sans", className)}>
+        {header && (
+          <CardHeader className="px-4 py-3 border-b text-xs font-semibold text-muted-foreground tracking-wide">
+            {header}
+          </CardHeader>
+        )}
+        <CardContent className="flex-1 overflow-hidden p-0">
+          <MessageArea placeholder={placeholder} />
+        </CardContent>
+        <CardFooter className="border-t p-0">
+          <InputBar />
+        </CardFooter>
+      </Card>
     </ChatBox>
   )
 }
@@ -115,27 +129,24 @@ function MessageArea({ placeholder }: { placeholder: string }) {
     <div
       ref={containerRefCallback}
       onScroll={scroll.onScroll}
-      style={fullStyles.messageArea}
+      className="flex-1 overflow-y-auto relative h-full"
     >
       {messages.length === 0 ? (
-        <div style={fullStyles.placeholder}>{placeholder}</div>
+        <div className="text-muted-foreground text-center px-8 py-20 text-sm leading-relaxed">
+          {placeholder}
+        </div>
       ) : (
-        <div style={{ height: totalHeight, position: "relative" }}>
+        <div className="relative" style={{ height: totalHeight }}>
           {virtualMessages.map((vm) => {
             const msg = messages[vm.index]
             return (
               <div
                 key={vm.id}
-                style={{
-                  position: "absolute",
-                  top: vm.offsetTop,
-                  left: 0,
-                  right: 0,
-                  display: "flex",
-                  justifyContent:
-                    msg.role === "user" ? "flex-end" : "flex-start",
-                  padding: "0 16px",
-                }}
+                className={cn(
+                  "absolute left-0 right-0 flex px-4",
+                  msg.role === "user" ? "justify-end" : "justify-start",
+                )}
+                style={{ top: vm.offsetTop }}
               >
                 <MessageBubble message={msg} maxWidth={effectiveMaxWidth} />
               </div>
@@ -145,12 +156,14 @@ function MessageArea({ placeholder }: { placeholder: string }) {
       )}
 
       {!scroll.isAtBottom && messages.length > 0 && (
-        <button
+        <Button
+          variant="outline"
+          size="icon"
           onClick={() => scroll.scrollToBottom()}
-          style={fullStyles.scrollBtn}
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full z-10"
         >
           &darr;
-        </button>
+        </Button>
       )}
     </div>
   )
@@ -161,8 +174,8 @@ function MessageBubble({ message, maxWidth }: { message: Message; maxWidth: numb
 
   if (isUser) {
     return (
-      <div style={{ ...fullStyles.bubble, ...fullStyles.userBubble }}>
-        <div style={fullStyles.text}>{message.content}</div>
+      <div className="rounded-lg px-3.5 py-2 max-w-[85%] text-[15px] leading-[22px] bg-primary text-primary-foreground">
+        <div className="whitespace-pre-wrap break-words">{message.content}</div>
       </div>
     )
   }
@@ -176,22 +189,23 @@ function MessageBubble({ message, maxWidth }: { message: Message; maxWidth: numb
     >
       {({ width, copied, copy }) => (
         <div
+          className="rounded-lg px-3.5 py-2 max-w-[85%] text-[15px] leading-[22px] bg-card border text-card-foreground"
           style={{
-            ...fullStyles.bubble,
-            ...fullStyles.assistantBubble,
             width: width > 0 ? width + 28 : undefined,
             maxWidth: `min(${MAX_BUBBLE_WIDTH + 28}px, 100%)`,
           }}
         >
-          <div style={fullStyles.roleLabel}>Assistant</div>
-          <div style={fullStyles.text}>{message.content}</div>
-          <div style={fullStyles.actions}>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">
+            Assistant
+          </div>
+          <div className="whitespace-pre-wrap break-words">{message.content}</div>
+          <div className="mt-1 flex gap-2">
             <button
               onClick={copy}
-              style={{
-                ...fullStyles.actionBtn,
-                color: copied ? "#6c9" : "#555",
-              }}
+              className={cn(
+                "bg-transparent border-none text-[10px] cursor-pointer p-0 uppercase tracking-wide font-semibold",
+                copied ? "text-green-400" : "text-muted-foreground",
+              )}
             >
               {copied ? "Copied" : "Copy"}
             </button>
@@ -214,157 +228,28 @@ function InputBar() {
       maxHeight={150}
     >
       {({ setInput, submit, stop, isLoading, height, onKeyDown }) => (
-        <div style={fullStyles.inputBar}>
-          <textarea
+        <div className="flex gap-2 items-end p-3 w-full">
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Message..."
             disabled={isLoading}
+            className="flex-1 min-h-0 resize-none text-[15px] leading-[22px] font-sans"
             style={{
-              ...fullStyles.textarea,
               height,
               overflowY: height >= 150 ? "auto" : "hidden",
             }}
           />
-          <button
+          <Button
             onClick={isLoading ? stop : submit}
             disabled={!isLoading && !input.trim()}
-            style={{
-              ...fullStyles.sendBtn,
-              opacity: isLoading || input.trim() ? 1 : 0.3,
-              background: isLoading ? "#c44" : "#2a6",
-            }}
+            variant={isLoading ? "destructive" : "default"}
           >
             {isLoading ? "Stop" : "Send"}
-          </button>
+          </Button>
         </div>
       )}
     </ChatInput>
   )
-}
-
-const fullStyles: Record<string, CSSProperties> = {
-  shell: {
-    border: "1px solid #262626",
-    borderRadius: 16,
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    height: 560,
-    background: "#0d0d0d",
-    fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  },
-  header: {
-    padding: "12px 16px",
-    borderBottom: "1px solid #1a1a1a",
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#888",
-    letterSpacing: "0.02em",
-  },
-  messageArea: {
-    flex: 1,
-    overflowY: "auto",
-    position: "relative",
-  },
-  placeholder: {
-    color: "#444",
-    textAlign: "center",
-    padding: "80px 32px",
-    fontSize: 14,
-    lineHeight: "1.6",
-  },
-  bubble: {
-    padding: "8px 14px",
-    borderRadius: 10,
-    maxWidth: "85%",
-    fontSize: 15,
-    lineHeight: "22px",
-  },
-  userBubble: {
-    background: "#1a3a5c",
-    color: "#dde8f4",
-  },
-  assistantBubble: {
-    background: "#151515",
-    border: "1px solid #222",
-    color: "#d4d4d4",
-  },
-  roleLabel: {
-    fontSize: 10,
-    fontWeight: 700,
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.08em",
-    color: "#555",
-    marginBottom: 2,
-  },
-  text: {
-    whiteSpace: "pre-wrap" as const,
-    wordBreak: "break-word" as const,
-  },
-  actions: {
-    marginTop: 4,
-    display: "flex",
-    gap: 8,
-  },
-  actionBtn: {
-    background: "none",
-    border: "none",
-    fontSize: 10,
-    cursor: "pointer",
-    padding: 0,
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.06em",
-    fontWeight: 600,
-  },
-  scrollBtn: {
-    position: "absolute" as const,
-    bottom: 8,
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "#222",
-    border: "1px solid #333",
-    borderRadius: 20,
-    width: 36,
-    height: 36,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#aaa",
-    fontSize: 16,
-    cursor: "pointer",
-    zIndex: 10,
-  },
-  inputBar: {
-    borderTop: "1px solid #1a1a1a",
-    padding: "10px 12px",
-    display: "flex",
-    gap: 8,
-    alignItems: "flex-end",
-  },
-  textarea: {
-    flex: 1,
-    background: "#0a0a0a",
-    border: "1px solid #262626",
-    borderRadius: 10,
-    padding: "10px 14px",
-    color: "#ededed",
-    fontSize: 15,
-    fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    lineHeight: "22px",
-    resize: "none" as const,
-    outline: "none",
-  },
-  sendBtn: {
-    border: "none",
-    borderRadius: 10,
-    padding: "10px 18px",
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    whiteSpace: "nowrap" as const,
-    transition: "background 0.15s",
-  },
 }

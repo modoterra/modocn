@@ -57,12 +57,16 @@
       "type": "registry:block",
       "title": "Chat Message",
       "description": "Headless per-message component with pretext-powered balanced text (tightest bubble width preserving line count), copy-to-clipboard, and render props.",
-      "dependencies": ["@chenglou/pretext"],
+      "dependencies": ["@chenglou/pretext", "react-markdown", "remark-gfm", "shiki"],
       "registryDependencies": ["chat-box"],
       "categories": ["ai", "chat"],
       "files": [
         {
           "path": "registry/default/chat-message/components/chat-message.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/default/chat-message/components/markdown-content.tsx",
           "type": "registry:component"
         },
         {
@@ -94,6 +98,10 @@
         },
         {
           "path": "registry/default/chat-messages/hooks/use-chat-scroll.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "registry/default/chat-messages/hooks/use-dom-heights.ts",
           "type": "registry:hook"
         }
       ]
@@ -136,7 +144,7 @@
       "title": "Chat Full",
       "description": "Fully styled chat interface composing chat-box, chat-input, chat-message, and chat-messages. Reference implementation with virtualized messages, balanced text, auto-sizing input, and scroll management.",
       "dependencies": ["@chenglou/pretext"],
-      "registryDependencies": ["chat-box", "chat-input", "chat-message", "chat-messages"],
+      "registryDependencies": ["chat-box", "chat-input", "chat-message", "chat-messages", "button", "card", "textarea"],
       "categories": ["ai", "chat"],
       "files": [
         {

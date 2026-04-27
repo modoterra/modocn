@@ -1,16 +1,16 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react"
 import { useTheme } from "@/src/components/theme-provider"
 import { getSingletonHighlighter } from "shiki"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import type { CSSProperties, ReactNode } from "react"
+import type { ReactNode } from "react"
 import type { Highlighter } from "shiki"
 
 type PlaygroundProps = {
   children: ReactNode
   code: string
 }
-
-type Tab = "preview" | "code"
 
 const DARK_THEME = "github-dark-dimmed"
 const LIGHT_THEME = "github-light"
@@ -52,7 +52,6 @@ export const Playground = memo(function Playground({
   children,
   code,
 }: PlaygroundProps) {
-  const [tab, setTab] = useState<Tab>("preview")
   const [copied, setCopied] = useState(false)
   const { theme } = useTheme()
   const shikiTheme = theme === "dark" ? DARK_THEME : LIGHT_THEME
@@ -74,125 +73,44 @@ export const Playground = memo(function Playground({
   }, [])
 
   return (
-    <div>
-      <div style={styles.tabBar}>
-        <div style={styles.tabs}>
-          <button
-            type="button"
-            onClick={() => setTab("preview")}
-            style={{
-              ...styles.tab,
-              ...(tab === "preview" ? styles.tabActive : undefined),
-            }}
-          >
+    <Tabs defaultValue="preview">
+      <div className="flex items-center justify-between gap-5 mb-14">
+        <TabsList className="h-12">
+          <TabsTrigger value="preview" className="px-5 py-3.5">
             Preview
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("code")}
-            style={{
-              ...styles.tab,
-              ...(tab === "code" ? styles.tabActive : undefined),
-            }}
-          >
+          </TabsTrigger>
+          <TabsTrigger value="code" className="px-5 py-3.5">
             Code
-          </button>
-        </div>
-        {tab === "code" && (
-          <button
-            type="button"
-            onClick={handleCopy}
-            style={styles.copyButton}
-          >
-            {copied ? "Copied" : "Copy"}
-          </button>
-        )}
+          </TabsTrigger>
+        </TabsList>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleCopy}
+          className="h-auto px-0 py-2"
+        >
+          {copied ? "Copied" : "Copy"}
+        </Button>
       </div>
 
-      {tab === "preview" ? (
-        children
-      ) : (
-        <div style={styles.codeWrapper}>
+      <TabsContent value="preview" className="mt-0">
+        {children}
+      </TabsContent>
+
+      <TabsContent value="code" className="mt-0">
+        <div className="max-h-[32rem] overflow-y-auto">
           {highlightedHtml ? (
             <div
-              style={styles.codeInner}
+              className="overflow-x-auto p-9"
               dangerouslySetInnerHTML={{ __html: highlightedHtml }}
             />
           ) : (
-            <pre style={styles.codeFallback}>
+            <pre className="m-0 overflow-x-auto whitespace-pre p-9">
               <code>{code}</code>
             </pre>
           )}
         </div>
-      )}
-    </div>
+      </TabsContent>
+    </Tabs>
   )
 })
-
-const styles: Record<string, CSSProperties> = {
-  tabBar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "0.5rem",
-    marginBottom: "1rem",
-    borderBottom: "1px solid var(--border)",
-  },
-  tabs: {
-    display: "flex",
-    gap: "0",
-  },
-  tab: {
-    background: "none",
-    border: "none",
-    borderBottomWidth: "2px",
-    borderBottomStyle: "solid" as const,
-    borderBottomColor: "transparent",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase" as const,
-    color: "var(--muted-foreground)",
-    padding: "0.5rem 0.75rem",
-    marginBottom: "-1px",
-    transition: "color 0.15s, border-color 0.15s",
-  },
-  tabActive: {
-    color: "var(--foreground)",
-    borderBottomColor: "var(--foreground)",
-  },
-  copyButton: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "0.625rem",
-    fontWeight: 600,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
-    color: "var(--muted-foreground)",
-    padding: "0.25rem 0",
-  },
-  codeWrapper: {
-    border: "1px solid var(--border)",
-    background: "var(--card)",
-    maxHeight: "32rem",
-    overflowY: "auto" as const,
-  },
-  codeInner: {
-    padding: "1rem",
-    fontSize: "0.8125rem",
-    lineHeight: 1.6,
-    overflowX: "auto" as const,
-  },
-  codeFallback: {
-    padding: "1rem",
-    fontSize: "0.8125rem",
-    lineHeight: 1.6,
-    overflowX: "auto" as const,
-    margin: 0,
-    whiteSpace: "pre" as const,
-  },
-}

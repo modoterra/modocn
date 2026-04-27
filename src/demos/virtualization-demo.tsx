@@ -5,6 +5,8 @@ import {
 import { ChatMessage } from "@/registry/default/chat-message/components/chat-message"
 import { MarkdownContent } from "@/registry/default/chat-message/components/markdown-content"
 import { ChatMessages } from "@/registry/default/chat-messages/components/chat-messages"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   memo,
   useCallback,
@@ -15,7 +17,6 @@ import {
 } from "react"
 import { createMockStreamFetch } from "../lib/mock-stream"
 
-import type { CSSProperties } from "react"
 import type { Message } from "@/registry/default/chat-box/lib/types"
 
 const mockFetch = createMockStreamFetch({ tokenDelay: 20 })
@@ -88,122 +89,6 @@ type LogEntry = {
   totalHeight: number
 }
 
-const styles: Record<string, CSSProperties> = {
-  shell: {
-    border: "1px solid var(--border)",
-  },
-  header: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "0.75rem",
-    padding: "1rem",
-    borderBottom: "1px solid var(--border)",
-  },
-  headerTop: {
-    display: "flex",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-    gap: "0.5rem",
-  },
-  headerTitle: {
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase" as const,
-  },
-  headerDesc: {
-    fontSize: "0.8125rem",
-    color: "var(--muted-foreground)",
-    lineHeight: 1.6,
-  },
-  stats: {
-    display: "flex",
-    flexWrap: "wrap" as const,
-    gap: "0.25rem 1.5rem",
-    fontSize: "0.75rem",
-    color: "var(--muted-foreground)",
-  },
-  statHighlight: {
-    color: "var(--foreground)",
-    fontWeight: 500,
-  },
-  conversation: {
-    position: "relative" as const,
-    height: 420,
-    overflowY: "auto" as const,
-    padding: "1rem",
-  },
-  userBubble: {
-    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
-    padding: "0.625rem 0.875rem",
-    border: "1px solid var(--border)",
-    background: "var(--card)",
-  },
-  assistantBubble: {
-    maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)`,
-    padding: "0.625rem 0.875rem",
-    border: "1px solid var(--border)",
-  },
-  bubbleRole: {
-    fontSize: "0.625rem",
-    fontWeight: 600,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
-    color: "var(--muted-foreground)",
-    marginBottom: "0.375rem",
-  },
-  bubbleText: {
-    fontSize: "0.875rem",
-    lineHeight: 1.65,
-    whiteSpace: "pre-wrap" as const,
-    wordBreak: "break-word" as const,
-  },
-  copyBtn: {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: "0.375rem",
-  },
-  copyButton: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "0.625rem",
-    fontWeight: 600,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
-    color: "var(--muted-foreground)",
-    padding: "0.25rem 0",
-  },
-  scrollBtn: {
-    position: "absolute" as const,
-    bottom: 12,
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "var(--background)",
-    border: "1px solid var(--border)",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "0.6875rem",
-    color: "var(--foreground)",
-    padding: "0.25rem 0.75rem",
-  },
-  logSection: {
-    borderTop: "1px solid var(--border)",
-  },
-  logBody: {
-    padding: "0.75rem 1rem",
-    fontSize: "0.6875rem",
-    lineHeight: 1.7,
-    color: "var(--muted-foreground)",
-    background: "var(--card)",
-  },
-  logHighlight: {
-    color: "var(--foreground)",
-    fontWeight: 500,
-  },
-}
-
 export function VirtualizationDemo() {
   const [latestLog, setLatestLog] = useState<LogEntry | null>(null)
 
@@ -217,11 +102,13 @@ export function VirtualizationDemo() {
       fetch={mockFetch}
       initialMessages={INITIAL_MESSAGES}
     >
-      <div className="demo-shell" style={styles.shell}>
+      <Card className="min-w-0 max-w-full overflow-x-hidden">
         <VirtHeader latestLog={latestLog} />
-        <MemoVirtConversation onVirtualChange={updateLog} />
+        <CardContent className="p-0">
+          <MemoVirtConversation onVirtualChange={updateLog} />
+        </CardContent>
         <VirtLog entry={latestLog} />
-      </div>
+      </Card>
     </ChatBox>
   )
 }
@@ -230,16 +117,16 @@ function VirtHeader({ latestLog }: { latestLog: LogEntry | null }) {
   const { messages } = useChatBox()
 
   return (
-    <div style={styles.header}>
-      <div className="demo-header" style={styles.headerTop}>
-        <span style={styles.headerTitle}>Virtualization</span>
-        <div className="demo-header-meta" style={styles.stats}>
+    <CardHeader className="flex flex-col gap-5 px-5 py-6 border-b">
+      <div className="flex items-baseline justify-between gap-3 max-[480px]:flex-col max-[480px]:items-start max-[480px]:gap-3">
+        <span className="text-xs font-semibold tracking-wide uppercase">Virtualization</span>
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground max-[480px]:hidden">
           <span>
-            total: <strong style={styles.statHighlight}>{messages.length}</strong>
+            total: <strong className="text-foreground font-medium">{messages.length}</strong>
           </span>
           <span>
             rendered:{" "}
-            <strong style={styles.statHighlight}>
+            <strong className="text-foreground font-medium">
               {latestLog ? latestLog.rendered : "-"}
             </strong>
           </span>
@@ -251,11 +138,11 @@ function VirtHeader({ latestLog }: { latestLog: LogEntry | null }) {
           </span>
         </div>
       </div>
-      <p style={styles.headerDesc}>
+      <p className="text-[0.8125rem] text-muted-foreground leading-relaxed m-0">
         {messages.length} messages pre-loaded with markdown tables, code
         blocks, and lists. Scroll to see only a handful rendered at once.
       </p>
-    </div>
+    </CardHeader>
   )
 }
 
@@ -286,7 +173,7 @@ function VirtConversation({
 
   const renderContent = useCallback((message: Message) => {
     if (message.role === "user") {
-      return <div style={styles.bubbleText}>{message.content}</div>
+      return <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</div>
     }
     return (
       <MarkdownContent
@@ -317,7 +204,7 @@ function VirtConversation({
         measureKey={measureKey}
       >
         {({ messages, virtualMessages, totalHeight, scroll }) => (
-          <div style={{ position: "relative" }}>
+          <div className="relative">
             <VirtualWindowLogger
               virtualMessages={virtualMessages}
               messages={messages}
@@ -329,9 +216,9 @@ function VirtConversation({
             <div
               ref={scroll.containerRef}
               onScroll={scroll.onScroll}
-              style={styles.conversation}
+              className="relative h-[420px] overflow-y-auto p-4"
             >
-              <div style={{ height: totalHeight, position: "relative" }}>
+              <div className="relative" style={{ height: totalHeight }}>
                 {virtualMessages.map((vm) => {
                   const message = messages[vm.index]
                   const isUser = message.role === "user"
@@ -339,14 +226,8 @@ function VirtConversation({
                   return (
                     <div
                       key={vm.id}
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        right: 0,
-                        top: vm.offsetTop,
-                        display: "flex",
-                        justifyContent: isUser ? "flex-end" : "flex-start",
-                      }}
+                      className={`absolute left-0 right-0 flex ${isUser ? "justify-end" : "justify-start"}`}
+                      style={{ top: vm.offsetTop }}
                     >
                       {isUser ? (
                         <UserBubble content={message.content} />
@@ -359,13 +240,14 @@ function VirtConversation({
               </div>
 
               {!scroll.isAtBottom && messages.length > 0 && (
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => scroll.scrollToBottom()}
-                  style={styles.scrollBtn}
+                  className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs"
                 >
                   Jump to latest
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -429,9 +311,12 @@ function VirtualWindowLogger({
 
 const UserBubble = memo(function UserBubble({ content }: { content: string }) {
   return (
-    <div style={styles.userBubble}>
-      <div style={styles.bubbleRole}>You</div>
-      <div style={styles.bubbleText}>{content}</div>
+    <div
+      className="border border-border bg-card px-3.5 py-2.5"
+      style={{ maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)` }}
+    >
+      <div className="text-[0.625rem] font-semibold tracking-widest uppercase text-muted-foreground mb-1.5">You</div>
+      <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{content}</div>
     </div>
   )
 })
@@ -440,16 +325,24 @@ const AssistantBubble = memo(function AssistantBubble({ message }: { message: Me
   return (
     <ChatMessage message={message}>
       {({ copied, copy }) => (
-        <div style={styles.assistantBubble}>
-          <div style={styles.bubbleRole}>Assistant</div>
+        <div
+          className="border border-border px-3.5 py-2.5"
+          style={{ maxWidth: `min(${ASSISTANT_BUBBLE_WIDTH}px, 100%)` }}
+        >
+          <div className="text-[0.625rem] font-semibold tracking-widest uppercase text-muted-foreground mb-1.5">Assistant</div>
           <MarkdownContent
             content={message.content}
             className="text-[14px] leading-[1.65]"
           />
-          <div style={styles.copyBtn}>
-            <button type="button" onClick={copy} style={styles.copyButton}>
+          <div className="flex justify-end mt-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copy}
+              className="text-[0.625rem] font-semibold tracking-widest uppercase text-muted-foreground p-0 h-auto"
+            >
               {copied ? "Copied" : "Copy"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -459,18 +352,18 @@ const AssistantBubble = memo(function AssistantBubble({ message }: { message: Me
 
 function VirtLog({ entry }: { entry: LogEntry | null }) {
   return (
-    <div style={styles.logSection}>
-      <div style={styles.logBody}>
+      <div className="border-t border-border">
+      <div className="px-5 py-5 text-[0.6875rem] leading-relaxed text-muted-foreground bg-card">
         {entry === null ? (
-          <span style={{ opacity: 0.5 }}>
+          <span className="opacity-50">
             Scroll the chat above to see virtualization in action...
           </span>
         ) : (
           <span>
             Rendered{" "}
-            <strong style={styles.logHighlight}>{entry.rendered}</strong>
+            <strong className="text-foreground font-medium">{entry.rendered}</strong>
             {" of "}
-            <strong style={styles.logHighlight}>{entry.total}</strong>
+            <strong className="text-foreground font-medium">{entry.total}</strong>
             {" messages — window ["}
             {entry.windowStart}-{entry.windowEnd}
             {"] — scroll "}
