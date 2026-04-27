@@ -3,68 +3,24 @@ import { ChatCompositionDemo } from "@/src/demos/chat-composition-demo"
 import { StreamingPresetsDemo } from "@/src/demos/streaming-presets-demo"
 import { VirtualizationDemo } from "@/src/demos/virtualization-demo"
 import { Playground } from "@/src/components/playground"
-import type { CSSProperties } from "react"
+import { Separator } from "@/components/ui/separator"
 
 import chatCompositionSource from "@/src/demos/chat-composition-demo.tsx?raw"
 import streamingPresetsSource from "@/src/demos/streaming-presets-demo.tsx?raw"
 import virtualizationSource from "@/src/demos/virtualization-demo.tsx?raw"
 
-const styles: Record<string, CSSProperties> = {
-  page: {
-    padding: "2rem 0",
-  },
-  title: {
-    fontSize: "1.75rem",
-    fontWeight: 700,
-    lineHeight: 1.2,
-    margin: 0,
-  },
-  intro: {
-    marginTop: "1rem",
-    fontSize: "1rem",
-    lineHeight: 1.7,
-    color: "var(--muted-foreground)",
-    maxWidth: "42rem",
-  },
-  section: {
-    marginTop: "3rem",
-  },
-  sectionTitle: {
-    fontSize: "1.125rem",
-    fontWeight: 600,
-    marginBottom: "0.5rem",
-  },
-  sectionDesc: {
-    fontSize: "0.9375rem",
-    lineHeight: 1.7,
-    color: "var(--muted-foreground)",
-    maxWidth: "42rem",
-    marginBottom: "1.5rem",
-  },
-  nav: {
-    marginTop: "3rem",
-    paddingTop: "2rem",
-    borderTop: "1px solid var(--border)",
-    display: "flex",
-    flexWrap: "wrap" as const,
-    justifyContent: "space-between",
-    gap: "0.5rem",
-    fontSize: "1rem",
-  },
-}
-
 export function DemosPage() {
   return (
-    <div style={styles.page}>
-      <h1 style={styles.title}>Demos</h1>
-      <p style={styles.intro}>
+    <div>
+      <h1 className="m-0">Demos</h1>
+      <p className="mt-14 max-w-[48rem]">
         Live demonstrations of the modocn registry components. All demos
         use mock streaming — no API key required.
       </p>
 
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Chat Composition</h2>
-        <p style={styles.sectionDesc}>
+      <section className="mt-28">
+        <h2 className="mb-12">Chat Composition</h2>
+        <p className="mb-14 max-w-[48rem]">
           Streaming chat with markdown rendering, virtualized messages,
           and copy support. Type a message to see it in action.
         </p>
@@ -73,11 +29,11 @@ export function DemosPage() {
         </Playground>
       </section>
 
-      <hr style={{ marginTop: "3rem" }} />
+      <Separator className="my-28" />
 
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Streaming Text Presets</h2>
-        <p style={styles.sectionDesc}>
+      <section>
+        <h2 className="mb-12">Streaming Text Presets</h2>
+        <p className="mb-14 max-w-[48rem]">
           Five animation presets for word-level streaming text. Each card
           loops the same text with a different animation.
         </p>
@@ -86,11 +42,11 @@ export function DemosPage() {
         </Playground>
       </section>
 
-      <hr style={{ marginTop: "3rem" }} />
+      <Separator className="my-28" />
 
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Virtualization</h2>
-        <p style={styles.sectionDesc}>
+      <section>
+        <h2 className="mb-12">Virtualization</h2>
+        <p className="mb-14 max-w-[48rem]">
           500 pre-loaded messages with markdown content. Scroll the
           conversation and watch the virtualization log — only a handful
           of messages are in the DOM at any time.
@@ -100,7 +56,9 @@ export function DemosPage() {
         </Playground>
       </section>
 
-      <nav style={styles.nav}>
+      <Separator className="mt-32" />
+
+      <nav className="flex flex-wrap justify-between gap-4 py-16">
         <Link to="/docs/components">
           &larr; Components
         </Link>
